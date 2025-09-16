@@ -5,7 +5,7 @@ import DocumentCard from "./_components/document-card";
 export default function Home() {
   return (
     <div className="grid grid-cols-5 gap-6 my-5">
-      <div className="border-3 border-dashed p-3.5 rounded-lg flex justify-center flex-col items-center text-center  hover:cursor-pointer hover:bg-zinc-100">
+      <div className="border-2 border-dashed hover:border-primary p-3.5 rounded-lg flex justify-center flex-col items-center text-center  hover:cursor-pointer hover:bg-zinc-100">
         <Link href="/upload" className="space-y-3">
           <div className="flex items-center flex-col space-y-2.5">
             <UploadIcon size={35} strokeWidth={2} />
