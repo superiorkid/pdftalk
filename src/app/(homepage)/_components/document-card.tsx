@@ -1,4 +1,4 @@
-import { CalendarIcon, DownloadIcon, FileIcon } from "lucide-react";
+import { CalendarIcon, DownloadIcon, FileIcon, TagIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +54,10 @@ const DocumentCard = () => {
           <p className="flex items-center gap-1.5">
             <CalendarIcon size={12} strokeWidth={2} />
             <span>2 hours ago</span>
+          </p>
+          <p className="flex items-center gap-1.5">
+            <TagIcon size={12} strokeWidth={2} />
+            <span>ML</span>
           </p>
         </div>
       </div>

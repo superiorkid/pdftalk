@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface PdfChatLayoutProps {
@@ -73,7 +73,17 @@ const PdfChatLayout = ({ children }: PdfChatLayoutProps) => {
           </Link>
         </div>
       </div>
-      <div className="flex-1 border-l ml-[344px]">{children}</div>
+      <div className="flex-1 border-l ml-[344px] grid min-h-[100dvh] grid-rows-[auto_1fr_auto]">
+        <header className="py-5 ps-7 border-b sticky top-0 bg-background">
+          <h1 className="2xl:text-xl text-lg font-black tracking-tight">
+            Chat with Machine Learning Fundamentals
+          </h1>
+          <p className="text-muted-foreground text-sm 2xl:text-base">
+            Ask questions about your PDF content
+          </p>
+        </header>
+        {children}
+      </div>
     </div>
   );
 };
