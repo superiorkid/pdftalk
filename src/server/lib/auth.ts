@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { openAPI } from "better-auth/plugins";
 import { prisma } from "./prisma";
 
 const auth = betterAuth({
@@ -10,6 +11,7 @@ const auth = betterAuth({
     enabled: true,
     autoSignIn: false,
   },
+  plugins: [openAPI()],
 });
 
 export default auth;
