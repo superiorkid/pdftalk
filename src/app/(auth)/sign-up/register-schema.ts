@@ -4,6 +4,7 @@ import { loginSchema } from "../sign-in/login-schema";
 export const registerSchema = loginSchema
   .omit({ rememberMe: true })
   .extend({
+    name: z.string().min(1, { error: "Name is required." }),
     confirmPassword: z.string().optional(),
   })
   .superRefine(({ password, confirmPassword }, ctx) => {

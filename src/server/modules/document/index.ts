@@ -1,6 +1,6 @@
 import type { Session, User } from "@prisma/client";
 import { type Context, Hono } from "hono";
-import privateRoutesMiddleware from "@/server/middleware";
+import privateRoutesMiddleware from "@/server/middleware/private-route.middleware";
 
 const documentController = new Hono<{
   Variables: { user: User | null; session: Session | null };

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -27,6 +28,16 @@ export default function RootLayout({
         )}
       >
         {children}
+        <Toaster
+          richColors
+          expand
+          position="top-right"
+          toastOptions={{
+            className:
+              "rounded-2xl shadow-lg border border-border bg-card text-card-foreground",
+            duration: 4000,
+          }}
+        />
       </body>
     </html>
   );
