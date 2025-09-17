@@ -1,8 +1,13 @@
+import type { Session, User } from "@prisma/client";
 import { type Context, Hono } from "hono";
+import privateRoutesMiddleware from "@/server/middleware";
 
-const documentRoutes = new Hono();
+const documentController = new Hono<{
+  Variables: { user: User | null; session: Session | null };
+}>();
 
-documentRoutes
+documentController.use(privateRoutesMiddleware);
+documentController
   .get("/", (ctx: Context) => {
     return ctx.json({ message: "get all documents" });
   })
@@ -13,4 +18,4 @@ documentRoutes
     return ctx.json({ message: "detail document" });
   });
 
-export default documentRoutes;
+export default documentController;
