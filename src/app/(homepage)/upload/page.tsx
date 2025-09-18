@@ -1,5 +1,4 @@
-import { Suspense } from "react";
-import UploadNewDocumentForm from "./_components/upload-new-document-form";
+import Helper from "./_components/helper";
 
 const UploadDocumentPage = () => {
   return (
@@ -10,7 +9,7 @@ const UploadDocumentPage = () => {
         </h1>
       </div>
 
-      <UploadNewDocumentForm />
+      <Helper />
     </div>
   );
 };

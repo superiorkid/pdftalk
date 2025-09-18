@@ -2,10 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUpIcon, XIcon } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -27,10 +28,22 @@ import {
   uploadDocumentSchema,
 } from "./upload-document-schema";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
+// Dynamically import react-pdf components (no SSR)
+const Document = dynamic(
+  () => import("react-pdf").then((mod) => mod.Document),
+  { ssr: false },
+);
+const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
+  ssr: false,
+});
+
+// Set worker only in browser
+if (typeof window !== "undefined" && "Worker" in window) {
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url,
+  ).toString();
+}
 
 const UploadNewDocumentForm = () => {
   const router = useRouter();
@@ -98,7 +111,9 @@ const UploadNewDocumentForm = () => {
       form.setValue("cover", coverFile);
     };
 
-    generateCover();
+    if (typeof window !== "undefined") {
+      generateCover();
+    }
   }, [files, form]);
 
   return (
@@ -108,8 +123,8 @@ const UploadNewDocumentForm = () => {
           <div className="flex gap-12">
             <div className="relative aspect-square w-[402px]">
               {/** biome-ignore lint/a11y/useFocusableInteractive: <explanation> */}
-              {/** biome-ignore lint/a11y/useSemanticElements: <explanation> */}
               {/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+              {/** biome-ignore lint/a11y/useSemanticElements: <explanation> */}
               <div
                 role="button"
                 onClick={openFileDialog}
@@ -125,7 +140,7 @@ const UploadNewDocumentForm = () => {
                   className="sr-only"
                   aria-label="Upload file"
                 />
-                {files[0]?.file ? (
+                {typeof window !== "undefined" && files[0]?.file ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-white">
                     <Document file={files[0].file}>
                       <Page pageNumber={1} width={250} />

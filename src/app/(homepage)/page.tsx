@@ -1,11 +1,11 @@
 import { UploadIcon } from "lucide-react";
 import Link from "next/link";
-import DocumentCard from "./_components/document-card";
+import DocumentList from "./_components/document-list";
 
 export default function Home() {
   return (
     <div className="grid grid-cols-5 gap-6 my-5">
-      <div className="border-2 border-dashed hover:border-primary p-3.5 rounded-lg flex justify-center flex-col items-center text-center  hover:cursor-pointer hover:bg-zinc-100">
+      <div className="border-2 h-[475px] border-dashed hover:border-primary p-3.5 rounded-lg flex justify-center flex-col items-center text-center  hover:cursor-pointer hover:bg-zinc-100">
         <Link href="/upload" className="space-y-3">
           <div className="flex items-center flex-col space-y-2.5">
             <UploadIcon size={35} strokeWidth={2} />
@@ -16,10 +16,7 @@ export default function Home() {
           </p>
         </Link>
       </div>
-      {Array.from({ length: 8 }).map((_, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: its for dummy data
-        <DocumentCard key={index} />
-      ))}
+      <DocumentList />
     </div>
   );
 }
