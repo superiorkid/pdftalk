@@ -1,4 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import type { TUploadDocumentSchema } from "@/app/(homepage)/upload/upload-document-schema";
 import { documentKeys } from "@/lib/query-keys";
 import client from "@/lib/rpc";
 
@@ -12,4 +14,28 @@ export function useDocuments() {
   });
 
   return documents;
+}
+
+export function useNewDocument(props?: { onSuccess?: () => void }) {
+  const { onSuccess } = props || {};
+  return useMutation({
+    mutationFn: async (value: TUploadDocumentSchema) => {
+      const res = await client.api.documents.$post({
+        form: value,
+      });
+      return res.json();
+    },
+    onError: () => {
+      toast.error("Failed to upload document", {
+        description: "lorem lorem lorem lorem",
+      });
+    },
+    onSuccess(_data, _variables, _onMutateResult, context) {
+      context.client.invalidateQueries({ queryKey: documentKeys.all });
+      toast.success("add document successfully", {
+        description: "asdmasdm",
+      });
+      onSuccess?.();
+    },
+  });
 }

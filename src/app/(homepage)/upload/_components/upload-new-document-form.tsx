@@ -1,12 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImageUpIcon, XIcon } from "lucide-react";
-import dynamic from "next/dynamic";
+import { ImageUpIcon, Loader2, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { pdfjs } from "react-pdf";
+import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,33 +16,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCategories } from "@/hooks/queries/category.query";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import { useNewDocument } from "@/hooks/queries/document.query";
 import {
   MAX_SIZE_IN_MB,
   MAX_UPLOAD_SIZE,
   type TUploadDocumentSchema,
   uploadDocumentSchema,
-} from "./upload-document-schema";
+} from "../upload-document-schema";
 
-// Dynamically import react-pdf components (no SSR)
-const Document = dynamic(
-  () => import("react-pdf").then((mod) => mod.Document),
-  { ssr: false },
-);
-const Page = dynamic(() => import("react-pdf").then((mod) => mod.Page), {
-  ssr: false,
-});
-
-// Set worker only in browser
-if (typeof window !== "undefined" && "Worker" in window) {
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url,
-  ).toString();
-}
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
 
 const UploadNewDocumentForm = () => {
   const router = useRouter();
@@ -78,9 +74,17 @@ const UploadNewDocumentForm = () => {
     },
   });
 
+  const { mutate, isPending: uploadDocumentMutationPending } = useNewDocument({
+    onSuccess: () => {
+      router.replace("/");
+    },
+  });
+
   const onSubmit = (values: TUploadDocumentSchema) => {
-    console.log(values);
+    mutate(values);
   };
+
+  const { data: categories, isPending: categoriesPending } = useCategories();
 
   useEffect(() => {
     const generateCover = async () => {
@@ -97,11 +101,14 @@ const UploadNewDocumentForm = () => {
 
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d")!;
+      const context = canvas.getContext("2d");
       canvas.width = viewport.width;
       canvas.height = viewport.height;
 
-      await page.render({ canvasContext: context, viewport }).promise;
+      await page.render({
+        canvasContext: context as CanvasRenderingContext2D,
+        viewport,
+      }).promise;
 
       const coverBase64 = canvas.toDataURL("image/png");
       const res = await fetch(coverBase64);
@@ -140,9 +147,14 @@ const UploadNewDocumentForm = () => {
                   className="sr-only"
                   aria-label="Upload file"
                 />
-                {typeof window !== "undefined" && files[0]?.file ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white">
-                    <Document file={files[0].file}>
+                {files[0]?.file ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white">
+                    <Document
+                      file={files[0].file}
+                      onLoadSuccess={({ numPages }) => {
+                        form.setValue("pageCount", numPages.toString());
+                      }}
+                    >
                       <Page pageNumber={1} width={250} />
                     </Document>
                   </div>
@@ -179,23 +191,70 @@ const UploadNewDocumentForm = () => {
 
             <div className="relative flex-1">
               <div className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter title..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-6 items-center">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    disabled={uploadDocumentMutationPending}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter title..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    disabled={
+                      categoriesPending || uploadDocumentMutationPending
+                    }
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className="w-full"
+                              disabled={field.disabled}
+                            >
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {!(categories?.data || []).length ? (
+                              <SelectItem value="0" disabled>
+                                No Category Found
+                              </SelectItem>
+                            ) : (
+                              categories?.data.map((category) => (
+                                <SelectItem
+                                  key={category.id}
+                                  value={category.id}
+                                >
+                                  {category.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
                   name="description"
+                  disabled={uploadDocumentMutationPending}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
@@ -217,10 +276,17 @@ const UploadNewDocumentForm = () => {
               type="button"
               variant="destructive"
               onClick={() => router.back()}
+              disabled={uploadDocumentMutationPending}
             >
               Cancel
             </Button>
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={uploadDocumentMutationPending}>
+              {uploadDocumentMutationPending ? (
+                <Loader2 strokeWidth={2} className="animate-spin" />
+              ) : (
+                "Submit"
+              )}
+            </Button>
           </div>
         </form>
       </Form>

@@ -7,6 +7,7 @@ export const ACCEPTED_FILE_TYPES = ["application/pdf"];
 export const uploadDocumentSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().optional(),
+  category: z.string().min(1, { error: "category is required" }),
   file: z
     .instanceof(File)
     .refine(
@@ -28,5 +29,6 @@ export const uploadDocumentSchema = z.object({
       "Cover must be an image (PNG, JPG, or WebP)",
     )
     .optional(),
+  pageCount: z.string(),
 });
 export type TUploadDocumentSchema = z.infer<typeof uploadDocumentSchema>;

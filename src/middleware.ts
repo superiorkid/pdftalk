@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
 
   if (PUBLIC_ROUTES.includes(pathname)) {
     if (sessionCookie) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();
   }

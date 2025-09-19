@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface PdfChatLayoutProps {

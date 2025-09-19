@@ -1,22 +1,26 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { UploadIcon } from "lucide-react";
 import Link from "next/link";
+import { getQueryClient } from "@/lib/query-client";
+import { documentKeys } from "@/lib/query-keys";
+import { getServerClient } from "@/lib/rpc-server";
 import DocumentList from "./_components/document-list";
 
-export default function Home() {
+export default async function Home() {
+  const queryClient = getQueryClient();
+  const apiClient = await getServerClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: documentKeys.all,
+    queryFn: async () => {
+      const response = await apiClient.api.documents.$get();
+      return response.json();
+    },
+  });
+
   return (
-    <div className="grid grid-cols-5 gap-6 my-5">
-      <div className="border-2 h-[475px] border-dashed hover:border-primary p-3.5 rounded-lg flex justify-center flex-col items-center text-center  hover:cursor-pointer hover:bg-zinc-100">
-        <Link href="/upload" className="space-y-3">
-          <div className="flex items-center flex-col space-y-2.5">
-            <UploadIcon size={35} strokeWidth={2} />
-            <h1 className="2xl:text-lg font-bold">Upload PDF</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Drop your PDF here or click to browse
-          </p>
-        </Link>
-      </div>
+    <HydrationBoundary state={dehydrate(queryClient)}>
       <DocumentList />
-    </div>
+    </HydrationBoundary>
   );
 }
