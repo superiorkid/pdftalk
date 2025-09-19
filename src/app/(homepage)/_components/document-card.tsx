@@ -1,4 +1,4 @@
-import type { Document } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { formatDistance } from "date-fns";
 import { CalendarIcon, DownloadIcon, FileIcon, TagIcon } from "lucide-react";
 import Image from "next/image";
@@ -6,19 +6,19 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
 interface DocumentCardProps {
-  document: Document & {
-    category: {
-      name: string;
-      id: string;
-      createdAt: string;
-      userId: string;
-    };
-  };
+  document: Prisma.DocumentGetPayload<{ include: { category: true } }>;
 }
 
 const DocumentCard = ({ document }: DocumentCardProps) => {
+  const isAvailable = document.status === "READY";
+
   return (
-    <div className="group border rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-lg transition-shadow">
+    <div
+      className={`group border rounded-xl overflow-hidden bg-white shadow-sm transition-shadow ${
+        isAvailable ? "hover:shadow-lg" : "opacity-50 cursor-not-allowed"
+      }`}
+      aria-disabled={!isAvailable}
+    >
       <div className="relative h-[301px] overflow-hidden">
         {document.coverPath ? (
           <Image
@@ -28,7 +28,7 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
             loading="lazy"
             decoding="async"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition-transform group-hover:scale-105"
+            className={`object-cover transition-transform ${isAvailable ? "group-hover:scale-105" : ""}`}
           />
         ) : (
           <FileIcon size={35} strokeWidth={2} />
@@ -45,7 +45,11 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
       {/* Info */}
       <div className="p-4 space-y-3">
         <h1 className="text-lg font-semibold leading-tight tracking-tight hover:text-primary transition-colors line-clamp-1">
-          <Link href={`/documents/${document.id}`}>{document.title}</Link>
+          {isAvailable ? (
+            <Link href={`/documents/${document.id}`}>{document.title}</Link>
+          ) : (
+            <span title="Document is not available">{document.title}</span>
+          )}
         </h1>
 
         <p className="line-clamp-2 text-sm text-muted-foreground">

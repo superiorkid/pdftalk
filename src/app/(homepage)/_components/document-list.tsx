@@ -48,7 +48,7 @@ const DocumentList = () => {
         </div>
       </Link>
 
-      {documents.data.map((document) => (
+      {(documents.data || []).map((document) => (
         // @ts-expect-error
         <DocumentCard key={document.id} document={document} />
       ))}

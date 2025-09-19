@@ -1,6 +1,4 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { UploadIcon } from "lucide-react";
-import Link from "next/link";
 import { getQueryClient } from "@/lib/query-client";
 import { documentKeys } from "@/lib/query-keys";
 import { getServerClient } from "@/lib/rpc-server";

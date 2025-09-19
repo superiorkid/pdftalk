@@ -10,6 +10,7 @@ import { uploadDocumentSchema } from "@/app/(homepage)/upload/upload-document-sc
 import { prisma } from "@/server/lib/prisma";
 import privateRoutesMiddleware from "@/server/middleware/private-route.middleware";
 import { saveFile } from "@/server/shared/file-upload-service";
+import { ingestPDF } from "@/server/shared/pdf-service";
 
 const UPLOAD_BASE_DIR = join(process.cwd(), "uploads");
 const DOCUMENTS_DIR = join(UPLOAD_BASE_DIR, "documents");
@@ -84,7 +85,7 @@ const documentController = new Hono<{
           );
         }
 
-        await prisma.document.create({
+        const document = await prisma.document.create({
           data: {
             title,
             pageCount: Number(pageCount),
@@ -97,6 +98,22 @@ const documentController = new Hono<{
             authorId: userId,
           },
         });
+
+        (async () => {
+          try {
+            await ingestPDF(document.id, documentFileInfo.filePath); // use absolute
+            await prisma.document.update({
+              where: { id: document.id },
+              data: { status: "READY" },
+            });
+          } catch (err) {
+            console.error("Ingestion failed", err);
+            await prisma.document.update({
+              where: { id: document.id },
+              data: { status: "FAILED" },
+            });
+          }
+        })();
 
         return ctx.json(
           { message: "create documents successfully", success: true },
