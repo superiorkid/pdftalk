@@ -42,13 +42,16 @@ const DocumentCard = ({ document }: DocumentCardProps) => {
         </Badge>
       </div>
 
-      {/* Info */}
       <div className="p-4 space-y-3">
         <h1 className="text-lg font-semibold leading-tight tracking-tight hover:text-primary transition-colors line-clamp-1">
           {isAvailable ? (
-            <Link href={`/documents/${document.id}`}>{document.title}</Link>
+            <Link href={`/documents/${document.id}`} className="capitalize">
+              {document.title}
+            </Link>
           ) : (
-            <span title="Document is not available">{document.title}</span>
+            <span title="Document is not available" className="capitalize">
+              {document.title}
+            </span>
           )}
         </h1>
 

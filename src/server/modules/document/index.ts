@@ -127,8 +127,39 @@ const documentController = new Hono<{
       }
     },
   )
-  .get("/:id", privateRoutesMiddleware, (ctx) => {
-    return ctx.json({ message: "detail document" });
+  .get("/:id", privateRoutesMiddleware, async (ctx) => {
+    const documentId = ctx.req.param("id");
+    const userId = ctx.get("user")?.id;
+
+    try {
+      const document = await prisma.document.findFirst({
+        where: { AND: [{ id: documentId }, { authorId: userId }] },
+        include: {
+          category: true,
+        },
+      });
+      if (!document)
+        throw new HTTPException(404, { message: "Document not found" });
+
+      return ctx.json(
+        {
+          message: "detail document",
+          success: true,
+          data: document,
+        },
+        200,
+      );
+    } catch (error) {
+      console.error(JSON.stringify(error));
+
+      if (error instanceof HTTPException) {
+        throw error;
+      }
+
+      throw new HTTPException(500, {
+        message: "Failed to get detail document",
+      });
+    }
   })
   .get("/:id/cover", async (ctx) => {
     const documentId = ctx.req.param("id");

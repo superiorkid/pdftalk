@@ -11,6 +11,12 @@ export function useDocuments() {
       const res = await client.api.documents.$get();
       return res.json();
     },
+    refetchInterval: (query) => {
+      const hasProcessing = query.state.data?.data.some(
+        (doc) => doc.status !== "READY",
+      );
+      return hasProcessing ? 3000 : false;
+    },
   });
 
   return documents;

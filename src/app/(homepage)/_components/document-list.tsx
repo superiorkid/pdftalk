@@ -32,7 +32,7 @@ const DocumentList = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 my-5">
       <Link
         href="/upload"
         className="group border-2 h-[475px] border-dashed rounded-xl flex flex-col items-center justify-center text-center p-6 transition-all hover:border-primary hover:bg-accent/30 hover:shadow-lg"
