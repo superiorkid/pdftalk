@@ -45,3 +45,18 @@ export function useNewDocument(props?: { onSuccess?: () => void }) {
     },
   });
 }
+
+export function useDocumentById(documentId: string) {
+  return useQuery({
+    queryKey: documentKeys.findById(documentId),
+    queryFn: async () => {
+      const res = await client.api.documents[":id"].$get({
+        param: {
+          id: documentId,
+        },
+      });
+      return res.json();
+    },
+    enabled: !!documentId,
+  });
+}

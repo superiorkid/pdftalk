@@ -45,7 +45,7 @@ const messages = [
     timestamp: new Date("2025-09-17T09:05:00"),
   },
   {
-    id: 5,
+    id: 7,
     sender: "human",
     text: "Whoa, that’s awesome!",
     timestamp: new Date("2025-09-17T09:04:00"),

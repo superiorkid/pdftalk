@@ -1,90 +1,43 @@
-import { CalendarIcon, DownloadIcon, FileIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type React from "react";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { getQueryClient } from "@/lib/query-client";
+import { documentKeys } from "@/lib/query-keys";
+import { getServerClient } from "@/lib/rpc-server";
+import DocumentDetailHeader from "./_components/document-detail-header";
+import DocumentDetailSidebar from "./_components/document-detail-sidebar";
 
 interface PdfChatLayoutProps {
   children: React.ReactNode;
+  params: Promise<{ documentId: string }>;
 }
 
-const PdfChatLayout = ({ children }: PdfChatLayoutProps) => {
+const PdfChatLayout = async ({ children, params }: PdfChatLayoutProps) => {
+  const { documentId } = await params;
+  const queryClient = getQueryClient();
+  const apiClient = await getServerClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: documentKeys.findById(documentId),
+    queryFn: async () => {
+      const res = await apiClient.api.documents[":id"].$get({
+        param: {
+          id: documentId,
+        },
+      });
+      return res.json();
+    },
+  });
+
   return (
-    <div className="flex min-h-screen">
-      <div className="w-[338px] flex flex-col justify-between fixed left-0 top-0 h-screen">
-        <div className="space-y-4 pb-2.5 pt-5 px-5 flex-1 overflow-y-auto">
-          <div className="h-[363px] border rounded-lg flex justify-center items-center shadow relative overflow-hidden">
-            <Image
-              fill
-              src="https://images.unsplash.com/photo-1706271948813-4d2c904af4d8?q=80&w=741&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="document cover"
-              loading="lazy"
-              decoding="async"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover"
-            />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight leading-tight">
-            Machine Learning Fundamentals
-          </h1>
-          <p className="line-clamp-3 leading-relaxed font-medium text-muted-foreground">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dicta ex
-            alias cupiditate? Numquam sit ut qui a ratione magnam doloribus eum,
-            iusto eos dignissimos sint beatae dolorem! Aliquid praesentium,
-            quasi asperiores veniam porro minus ducimus repellat molestias
-            deserunt dolorum maxime numquam harum quidem? Odit ex aut minus
-            cupiditate possimus porro.
-          </p>
-        </div>
-        <div className="px-5 py-2.5 space-y-8 max-h-fit">
-          <div className="space-y-4">
-            <h2 className="font-semibold">Document Details</h2>
-            <div className="space-y-2.5">
-              <div className="flex items-center space-x-2">
-                <DownloadIcon size={18} strokeWidth={2} />
-                <span className="text-sm">File Size</span>
-                <Badge variant="secondary" className="ml-auto">
-                  2.4 MB
-                </Badge>
-              </div>
-              <div className="flex items-center space-x-2">
-                <FileIcon size={18} strokeWidth={2} />
-                <span className="text-sm">Pages</span>
-                <Badge variant="secondary" className="ml-auto">
-                  24
-                </Badge>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CalendarIcon size={18} strokeWidth={2} />
-                <span className="text-sm">Uploaded</span>
-                <Badge variant="secondary" className="ml-auto">
-                  2 hours ago
-                </Badge>
-              </div>
-            </div>
-          </div>
-          <Link
-            href="/"
-            className={cn(buttonVariants({ className: "w-full" }))}
-          >
-            Back to Library
-          </Link>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <div className="flex min-h-screen">
+        <DocumentDetailSidebar documentId={documentId} />
+        <div className="flex-1 border-l ml-[344px] grid min-h-[100dvh] grid-rows-[auto_1fr_auto]">
+          <DocumentDetailHeader documentId={documentId} />
+          {children}
         </div>
       </div>
-      <div className="flex-1 border-l ml-[344px] grid min-h-[100dvh] grid-rows-[auto_1fr_auto]">
-        <header className="py-5 ps-7 border-b sticky top-0 bg-background">
-          <h1 className="2xl:text-xl text-lg font-black tracking-tight">
-            Chat with Machine Learning Fundamentals
-          </h1>
-          <p className="text-muted-foreground text-sm 2xl:text-base">
-            Ask questions about your PDF content
-          </p>
-        </header>
-        {children}
-      </div>
-    </div>
+    </HydrationBoundary>
   );
 };
 
