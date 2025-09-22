@@ -18,7 +18,7 @@ const DocumentDetailHeader = ({ documentId }: DocumentDetailHeaderProps) => {
   }
 
   return (
-    <header className="py-5 ps-7 border-b sticky top-0 bg-background">
+    <header className="py-5 ps-7 border-b sticky top-0 bg-background z-50">
       <h1 className="2xl:text-xl text-lg font-black tracking-tight capitalize">
         {document?.data.title}
       </h1>

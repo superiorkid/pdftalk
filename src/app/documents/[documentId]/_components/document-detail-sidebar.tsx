@@ -4,9 +4,23 @@ import { formatDistance } from "date-fns";
 import { CalendarIcon, DownloadIcon, FileIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { useDocumentById } from "@/hooks/queries/document.query";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  useDeleteDocumentById,
+  useDocumentById,
+} from "@/hooks/queries/document.query";
 import { cn } from "@/lib/utils";
 
 interface DocumentDetailSidebarProps {
@@ -14,9 +28,22 @@ interface DocumentDetailSidebarProps {
 }
 
 const DocumentDetailSidebar = ({ documentId }: DocumentDetailSidebarProps) => {
-  const { data: document, isPending, isError } = useDocumentById(documentId);
+  const router = useRouter();
 
-  if (isPending) {
+  const {
+    data: document,
+    isPending: documentPending,
+    isError,
+  } = useDocumentById(documentId);
+
+  const { mutate: daleteDocumentMutation, isPending: deleteDocumentPending } =
+    useDeleteDocumentById({
+      onSuccess: () => {
+        router.replace("/");
+      },
+    });
+
+  if (documentPending) {
     return (
       <div>
         <p>Loading...</p>
@@ -88,9 +115,51 @@ const DocumentDetailSidebar = ({ documentId }: DocumentDetailSidebarProps) => {
             </div>
           </div>
         </div>
-        <Link href="/" className={cn(buttonVariants({ className: "w-full" }))}>
-          Back to Library
-        </Link>
+        <div className="space-y-2.5">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                className={cn(
+                  buttonVariants({
+                    variant: "destructive",
+                    className: "w-full hover:cursor-pointer",
+                  }),
+                  "gap-2",
+                )}
+              >
+                Delete Document
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleteDocumentPending}>
+                  Cancel
+                </AlertDialogCancel>
+                <Button
+                  variant="destructive"
+                  onClick={() => daleteDocumentMutation(document.data.id)}
+                  disabled={deleteDocumentPending}
+                >
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Link
+            href="/"
+            className={cn(buttonVariants({ className: "w-full" }))}
+          >
+            Back to Library
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type React from "react";
+import { ConversationPaginationContextProvider } from "@/context/conversation-pagination-context";
 import { getQueryClient } from "@/lib/query-client";
 import { documentKeys } from "@/lib/query-keys";
 import { getServerClient } from "@/lib/rpc-server";
@@ -30,13 +31,15 @@ const PdfChatLayout = async ({ children, params }: PdfChatLayoutProps) => {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex min-h-screen">
-        <DocumentDetailSidebar documentId={documentId} />
-        <div className="flex-1 border-l ml-[344px] grid min-h-[100dvh] grid-rows-[auto_1fr_auto]">
-          <DocumentDetailHeader documentId={documentId} />
-          {children}
+      <ConversationPaginationContextProvider>
+        <div className="flex min-h-screen">
+          <DocumentDetailSidebar documentId={documentId} />
+          <div className="flex-1 border-l ml-[344px] grid min-h-[100dvh] grid-rows-[auto_1fr_auto]">
+            <DocumentDetailHeader documentId={documentId} />
+            {children}
+          </div>
         </div>
-      </div>
+      </ConversationPaginationContextProvider>
     </HydrationBoundary>
   );
 };

@@ -90,6 +90,7 @@ model Document {
   updatedAt  DateTime           @updatedAt @map("updated_at")
   author     User?              @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId   String?            @map("author_id")
+  messages Message[]
 
   @@map("documents")
 }
@@ -103,4 +104,21 @@ model Category {
   userId    String     @map("user_id")
 
   @@map("categories")
+}
+
+enum MessageSender {
+  USER
+  AI
+}
+
+model Message {
+  id String @id @default(cuid())
+  documentId String @map("document_id")
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  sender MessageSender
+  content String @db.Text
+  metadata Json?
+  createdAt DateTime @default(now())
+
+  @@map("messages")
 }

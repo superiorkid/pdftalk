@@ -33,7 +33,7 @@ export function useNewDocument(props?: { onSuccess?: () => void }) {
     },
     onError: () => {
       toast.error("Failed to upload document", {
-        description: "lorem lorem lorem lorem",
+        description: "Failed to upload document",
       });
     },
     onSuccess(_data, _variables, _onMutateResult, context) {
@@ -58,5 +58,30 @@ export function useDocumentById(documentId: string) {
       return res.json();
     },
     enabled: !!documentId,
+  });
+}
+
+export function useDeleteDocumentById(props?: { onSuccess?: () => void }) {
+  const { onSuccess } = props || {};
+  return useMutation({
+    mutationFn: async (documentId: string) => {
+      const res = await client.api.documents[":id"].$delete({
+        param: { id: documentId },
+      });
+      return res.json();
+    },
+    onError: (error) => {
+      toast.error("Delete Failed", {
+        description:
+          error.message || "Failed to delete document. Please try again.",
+      });
+    },
+    onSuccess(_data, _variables, _onMutateResult, context) {
+      context.client.invalidateQueries({ queryKey: documentKeys.all });
+      toast.success("Document Deleted", {
+        description: "The document has been successfully deleted.",
+      });
+      onSuccess?.();
+    },
   });
 }

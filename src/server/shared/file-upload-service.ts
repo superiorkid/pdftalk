@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 export function getExtensionFromMimeType(mimeType: string): string {
@@ -43,4 +43,14 @@ export async function saveFile(
   await writeFile(absolutePath, buffer);
 
   return { filename: safeFilename, filePath: absolutePath, relativePath };
+}
+
+export async function deleteFile(filePath?: string | null) {
+  if (filePath) {
+    try {
+      await unlink(join(process.cwd(), "uploads", filePath));
+    } catch (error) {
+      // ignore
+    }
+  }
 }

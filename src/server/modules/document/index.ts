@@ -7,10 +7,12 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { getMimeType } from "hono/utils/mime";
 import { uploadDocumentSchema } from "@/app/(homepage)/upload/upload-document-schema";
+import { pineconeIndex } from "@/server/lib/pinecone";
 import { prisma } from "@/server/lib/prisma";
 import privateRoutesMiddleware from "@/server/middleware/private-route.middleware";
-import { saveFile } from "@/server/shared/file-upload-service";
+import { deleteFile, saveFile } from "@/server/shared/file-upload-service";
 import { ingestPDF } from "@/server/shared/pdf-service";
+import getSafeNamespace from "@/server/utils/get-save-namespace";
 
 const UPLOAD_BASE_DIR = join(process.cwd(), "uploads");
 const DOCUMENTS_DIR = join(UPLOAD_BASE_DIR, "documents");
@@ -159,6 +161,39 @@ const documentController = new Hono<{
       throw new HTTPException(500, {
         message: "Failed to get detail document",
       });
+    }
+  })
+  .delete("/:id", privateRoutesMiddleware, async (ctx) => {
+    const userId = ctx.get("user")?.id;
+    const documentId = ctx.req.param("id");
+
+    const document = await prisma.document.findUnique({
+      where: { id: documentId },
+    });
+
+    if (!document || document.authorId !== userId) {
+      throw new HTTPException(404, { message: "Document not found" });
+    }
+
+    try {
+      const safeDocumentId = getSafeNamespace(documentId);
+      await Promise.all([
+        deleteFile(document.coverPath),
+        deleteFile(document.filePath),
+        pineconeIndex.deleteMany({ filter: { documentId: safeDocumentId } }),
+        prisma.document.delete({ where: { id: documentId } }),
+      ]);
+
+      return ctx.json(
+        {
+          success: true,
+          message: "Document deleted successfully",
+        },
+        200,
+      );
+    } catch (error) {
+      console.error(JSON.stringify(error));
+      throw new HTTPException(500, { message: "Failed to delete document" });
     }
   })
   .get("/:id/cover", async (ctx) => {

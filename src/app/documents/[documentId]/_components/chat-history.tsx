@@ -1,58 +1,47 @@
 "use client";
 
+import type { Message } from "@prisma/client";
 import { format } from "date-fns";
+import { MessageSquareIcon } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import MessageContent from "./message-content";
 
 interface ChatHistoryProps {
   containerStyle?: string;
+  messages: Message[];
 }
 
-const messages = [
-  {
-    id: 1,
-    sender: "human",
-    text: "Hey!",
-    timestamp: new Date("2025-09-17T09:00:00"),
-  },
-  {
-    id: 2,
-    sender: "ai",
-    text: "Hello 👋 It’s nice to hear from you! I’m here to help with anything you need — whether that’s answering questions, sharing fun facts, or just having a casual chat. How’s your day going so far?",
-    timestamp: new Date("2025-09-17T09:01:00"),
-  },
-  {
-    id: 3,
-    sender: "human",
-    text: "Pretty good! Can you tell me something interesting?",
-    timestamp: new Date("2025-09-17T09:02:00"),
-  },
-  {
-    id: 4,
-    sender: "ai",
-    text: "Of course! Here’s a fun fact: octopuses actually have three hearts 🐙. Two hearts pump blood to the gills, while the third pumps it to the rest of the body. Even more fascinating, their blood is blue because it uses copper instead of iron to carry oxygen. Isn’t that wild?",
-    timestamp: new Date("2025-09-17T09:03:00"),
-  },
-  {
-    id: 5,
-    sender: "human",
-    text: "Whoa, that’s awesome!",
-    timestamp: new Date("2025-09-17T09:04:00"),
-  },
-  {
-    id: 6,
-    sender: "ai",
-    text: "I’m glad you think so! If you like, I can share more curious facts about animals, space, or even technology. A lot of people are surprised to learn, for example, that honey never spoils — archaeologists have found pots of honey in ancient Egyptian tombs that are still edible after thousands of years! 🍯",
-    timestamp: new Date("2025-09-17T09:05:00"),
-  },
-  {
-    id: 7,
-    sender: "human",
-    text: "Whoa, that’s awesome!",
-    timestamp: new Date("2025-09-17T09:04:00"),
-  },
-];
+const ChatHistory = ({ containerStyle, messages }: ChatHistoryProps) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-const ChatHistory = ({ containerStyle }: ChatHistoryProps) => {
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  if (messages.length === 0) {
+    return (
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center p-8 text-center rounded-2xl h-full",
+          containerStyle,
+        )}
+      >
+        <div className="mb-4 rounded-full bg-gray-200 p-3">
+          <MessageSquareIcon className="h-6 w-6 text-gray-500" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+          No messages yet
+        </h3>
+        <p className="text-sm text-gray-500 max-w-xs">
+          Start a conversation by asking a question about your document.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -65,7 +54,7 @@ const ChatHistory = ({ containerStyle }: ChatHistoryProps) => {
           key={msg.id}
           className={cn(
             "flex max-w-[75%] items-end",
-            msg.sender === "human"
+            msg.sender === "USER"
               ? "ml-auto justify-end"
               : "mr-auto justify-start",
           )}
@@ -73,19 +62,19 @@ const ChatHistory = ({ containerStyle }: ChatHistoryProps) => {
           <div
             className={cn(
               "px-4 py-2 rounded-2xl text-sm relative leading-relaxed",
-              msg.sender === "human"
+              msg.sender === "USER"
                 ? "bg-gradient-to-r from-blue-500 to-blue-400 text-white rounded-br-sm"
                 : "bg-white text-gray-900 border border-gray-200 rounded-bl-sm",
             )}
           >
-            <span className="leading-relaxed">{msg.text}</span>
+            <MessageContent text={msg.content} isAI={msg.sender === "AI"} />
             <span
               className={cn(
                 "absolute bottom-1 right-2 text-[10px] opacity-70",
-                msg.sender === "human" ? "text-gray-200" : "text-gray-500",
+                msg.sender === "USER" ? "text-gray-200" : "text-gray-500",
               )}
             >
-              {format(msg.timestamp, "HH:mm")}
+              {format(msg.createdAt, "HH:mm")}
             </span>
           </div>
         </div>
@@ -93,5 +82,4 @@ const ChatHistory = ({ containerStyle }: ChatHistoryProps) => {
     </div>
   );
 };
-
 export default ChatHistory;
