@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import QueryClientProvider from "@/providers/query-client.provider";
 
 import "./globals.css";
+import { AuthUIProvider } from "@/providers/auth-ui.provider";
 
 const monserrat = Montserrat({
   weight: "400",
@@ -30,21 +31,23 @@ export default function RootLayout({
           monserrat.className,
         )}
       >
-        <QueryClientProvider>
-          <NuqsAdapter>
-            {children}
-            <Toaster
-              richColors
-              expand
-              position="top-right"
-              toastOptions={{
-                className:
-                  "rounded-2xl shadow-lg border border-border bg-card text-card-foreground",
-                duration: 4000,
-              }}
-            />
-          </NuqsAdapter>
-        </QueryClientProvider>
+        <AuthUIProvider>
+          <QueryClientProvider>
+            <NuqsAdapter>
+              {children}
+              <Toaster
+                richColors
+                expand
+                position="top-right"
+                toastOptions={{
+                  className:
+                    "rounded-2xl shadow-lg border border-border bg-card text-card-foreground",
+                  duration: 4000,
+                }}
+              />
+            </NuqsAdapter>
+          </QueryClientProvider>
+        </AuthUIProvider>
       </body>
     </html>
   );

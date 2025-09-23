@@ -1,7 +1,18 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/sign-in", "/sign-up"];
+const PUBLIC_ROUTES = [
+  "/auth/sign-in",
+  "/auth/sign-up",
+  "/auth/magic-link",
+  "/auth/forgot-password",
+  "/auth/two-factor",
+  "/auth/recover-account",
+  "/auth/reset-password",
+  "/auth/sign-out",
+  "/auth/callback",
+  "/auth/accept-invitation",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -15,7 +26,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!sessionCookie) {
-    const signInUrl = new URL("/sign-in", request.url);
+    const signInUrl = new URL("/auth/sign-in", request.url);
     signInUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(signInUrl);
   }
