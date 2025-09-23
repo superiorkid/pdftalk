@@ -3,13 +3,10 @@
 import {
   BoltIcon,
   ChevronDownIcon,
-  FilterIcon,
-  Grid3X3Icon,
   Layers2Icon,
-  ListIcon,
   LogOutIcon,
-  SearchIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import KeywordFilterInput from "./keyword-filter-input";
 
@@ -35,7 +31,7 @@ const HomepageHeader = () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/sign-in");
+          router.push("/auth/sign-in");
         },
       },
     });
@@ -44,12 +40,15 @@ const HomepageHeader = () => {
   return (
     <header className="border-b py-3.5 sticky top-0 bg-background/85 backdrop-blur-md z-50">
       <div className="max-w-7xl mx-auto flex justify-between px-5 2xl:px-0">
-        <div className="space-y-0.5">
-          <h1 className="font-bold text-xl tracking-tight">PDFTalker</h1>
-          <p className="text-muted-foreground text-sm tracking-wide">
-            Chat your documents using AI
-          </p>
-        </div>
+        <Link href="/">
+          <div className="space-y-0.5">
+            <h1 className="font-bold text-xl tracking-tight">PDFTalker</h1>
+            <p className="text-muted-foreground text-sm tracking-wide">
+              Chat your documents using AI
+            </p>
+          </div>
+        </Link>
+
         <div className="flex items-center gap-3">
           {pathname === "/" && (
             <Suspense>
@@ -87,7 +86,9 @@ const HomepageHeader = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push("/account/settings")}
+                >
                   <BoltIcon
                     size={16}
                     className="opacity-60"
@@ -95,7 +96,9 @@ const HomepageHeader = () => {
                   />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push("/account/security")}
+                >
                   <Layers2Icon
                     size={16}
                     className="opacity-60"
