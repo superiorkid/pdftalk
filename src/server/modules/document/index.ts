@@ -6,6 +6,7 @@ import type { Session, User } from "better-auth";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { getMimeType } from "hono/utils/mime";
+import { z } from "zod/v4";
 import { uploadDocumentSchema } from "@/app/(homepage)/upload/upload-document-schema";
 import { pineconeIndex } from "@/server/lib/pinecone";
 import { prisma } from "@/server/lib/prisma";
@@ -30,32 +31,52 @@ async function ensureUploadDirs() {
 const documentController = new Hono<{
   Variables: { user: User | null; session: Session | null };
 }>()
-  .get("/", privateRoutesMiddleware, async (ctx) => {
-    const userId = ctx.get("user")?.id;
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        q: z.string().optional(),
+      }),
+    ),
+    privateRoutesMiddleware,
+    async (ctx) => {
+      const userId = ctx.get("user")?.id;
+      const { q } = ctx.req.valid("query");
 
-    try {
-      const documents = await prisma.document.findMany({
-        where: {
-          authorId: userId,
-        },
-        include: {
-          category: true,
-        },
-        orderBy: { createdAt: "desc" },
-      });
-      return ctx.json(
-        {
-          success: true,
-          message: "get documents successfully",
-          data: documents,
-        },
-        200,
-      );
-    } catch (error) {
-      console.error(JSON.stringify(error));
-      throw new HTTPException(500, { message: "Failed to get documents" });
-    }
-  })
+      try {
+        const documents = await prisma.document.findMany({
+          where: {
+            authorId: userId,
+            title: q
+              ? {
+                  contains: q,
+                  mode: "insensitive",
+                }
+              : undefined,
+          },
+          include: {
+            category: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        return ctx.json(
+          {
+            success: true,
+            message: "get documents successfully",
+            data: documents,
+          },
+          200,
+        );
+      } catch (error) {
+        console.error(JSON.stringify(error));
+        throw new HTTPException(500, { message: "Failed to get documents" });
+      }
+    },
+  )
   .post(
     "/",
     privateRoutesMiddleware,

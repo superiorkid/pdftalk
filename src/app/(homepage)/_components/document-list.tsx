@@ -1,24 +1,23 @@
 "use client";
 
-import { AlertCircleIcon, Loader2Icon, UploadIcon } from "lucide-react";
+import { AlertCircleIcon, UploadIcon } from "lucide-react";
 import Link from "next/link";
+import { useQueryState } from "nuqs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDocuments } from "@/hooks/queries/document.query";
 import DocumentCard from "./document-card";
 
 const DocumentList = () => {
-  const { data: documents, isPending, isError } = useDocuments();
+  const [keyword] = useQueryState("q", {
+    clearOnDefault: true,
+    defaultValue: "",
+  });
 
-  if (isPending) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[300px]">
-        <Loader2Icon size={40} strokeWidth={2} className="animate-spin" />
-      </div>
-    );
-  }
+  const { data: documents, isPending, isError } = useDocuments(keyword);
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[300px] space-y-2 text-center px-4">
+      <div className="col-span-full flex flex-col items-center justify-center min-h-[300px] space-y-2 text-center px-4">
         <AlertCircleIcon className="text-red-400" size={40} strokeWidth={2} />
         <h2 className="text-xl font-semibold text-red-600">
           Oops! Something went wrong.
@@ -48,10 +47,15 @@ const DocumentList = () => {
         </div>
       </Link>
 
-      {(documents.data || []).map((document) => (
-        // @ts-expect-error
-        <DocumentCard key={document.id} document={document} />
-      ))}
+      {isPending &&
+        Array.from({ length: 2 }).map((_, index) => <Skeleton key={index} />)}
+
+      {!isPending &&
+        !isError &&
+        (documents?.data || []).map((document) => (
+          // @ts-expect-error - adjust type later
+          <DocumentCard key={document.id} document={document} />
+        ))}
     </div>
   );
 };

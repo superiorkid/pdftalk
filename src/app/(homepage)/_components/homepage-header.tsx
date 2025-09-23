@@ -11,6 +11,7 @@ import {
   SearchIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { Suspense } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import KeywordFilterInput from "./keyword-filter-input";
 
 const HomepageHeader = () => {
   const pathname = usePathname();
@@ -50,39 +52,9 @@ const HomepageHeader = () => {
         </div>
         <div className="flex items-center gap-3">
           {pathname === "/" && (
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Input
-                  className="peer ps-9 pe-9"
-                  placeholder="Search PDFs..."
-                  type="search"
-                />
-                <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
-                  <SearchIcon size={16} />
-                </div>
-                <button
-                  className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Submit search"
-                  type="submit"
-                >
-                  <FilterIcon size={16} aria-hidden="true" />
-                </button>
-              </div>
-              <div className="flex items-center gap-1 border rounded-lg overflow-hidden p-[1.2px]">
-                <button
-                  type="button"
-                  className="hover:bg-zinc-300 size-8 flex justify-center items-center hover:cursor-pointer"
-                >
-                  <Grid3X3Icon size={16} strokeWidth={2} />
-                </button>
-                <button
-                  type="button"
-                  className="hover:bg-zinc-300 size-8 flex justify-center items-center hover:cursor-pointer"
-                >
-                  <ListIcon size={16} strokeWidth={2} />
-                </button>
-              </div>
-            </div>
+            <Suspense>
+              <KeywordFilterInput />
+            </Suspense>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

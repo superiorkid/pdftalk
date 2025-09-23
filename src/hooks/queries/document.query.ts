@@ -4,11 +4,15 @@ import type { TUploadDocumentSchema } from "@/app/(homepage)/upload/upload-docum
 import { documentKeys } from "@/lib/query-keys";
 import client from "@/lib/rpc";
 
-export function useDocuments() {
+export function useDocuments(keyword?: string) {
   const documents = useQuery({
-    queryKey: documentKeys.all,
+    queryKey: documentKeys.allWithKeyword(keyword || ""),
     queryFn: async () => {
-      const res = await client.api.documents.$get();
+      const res = await client.api.documents.$get({
+        query: {
+          q: keyword,
+        },
+      });
       return res.json();
     },
     refetchInterval: (query) => {

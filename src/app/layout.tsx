@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import QueryClientProvider from "@/providers/query-client.provider";
+
 import "./globals.css";
 
 const monserrat = Montserrat({
@@ -29,17 +31,19 @@ export default function RootLayout({
         )}
       >
         <QueryClientProvider>
-          {children}
-          <Toaster
-            richColors
-            expand
-            position="top-right"
-            toastOptions={{
-              className:
-                "rounded-2xl shadow-lg border border-border bg-card text-card-foreground",
-              duration: 4000,
-            }}
-          />
+          <NuqsAdapter>
+            {children}
+            <Toaster
+              richColors
+              expand
+              position="top-right"
+              toastOptions={{
+                className:
+                  "rounded-2xl shadow-lg border border-border bg-card text-card-foreground",
+                duration: 4000,
+              }}
+            />
+          </NuqsAdapter>
         </QueryClientProvider>
       </body>
     </html>
