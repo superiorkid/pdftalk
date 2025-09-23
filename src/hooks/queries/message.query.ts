@@ -1,4 +1,9 @@
-import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { messageKeys } from "@/lib/query-keys";
 import client from "@/lib/rpc";
@@ -27,21 +32,23 @@ export function useInfiniteMessages(params: {
   limit: number;
 }) {
   const { documentId, limit } = params;
+
   return useInfiniteQuery({
     queryKey: messageKeys.allByDocumentId(documentId),
     queryFn: async ({ pageParam = 1 }) => {
       const res = await client.api.messages[":documentId"].$get({
         param: { documentId },
-        query: { page: pageParam.toString(), limit: limit.toString() },
+        query: { page: String(pageParam), limit: String(limit) },
       });
       return res.json();
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage?.pagination?.hasNextPage
-        ? lastPage.pagination.page + 1
-        : undefined;
-    },
     initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage?.pagination) return undefined;
+      const { page, limit, total } = lastPage.pagination;
+      const totalPages = Math.ceil(total / limit);
+      return page < totalPages ? page + 1 : undefined;
+    },
   });
 }
 

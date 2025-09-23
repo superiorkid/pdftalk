@@ -1,4 +1,5 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { notFound } from "next/navigation";
 import type React from "react";
 import { ConversationPaginationContextProvider } from "@/context/conversation-pagination-context";
 import { getQueryClient } from "@/lib/query-client";
@@ -17,17 +18,16 @@ const PdfChatLayout = async ({ children, params }: PdfChatLayoutProps) => {
   const queryClient = getQueryClient();
   const apiClient = await getServerClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: documentKeys.findById(documentId),
-    queryFn: async () => {
-      const res = await apiClient.api.documents[":id"].$get({
-        param: {
-          id: documentId,
-        },
-      });
-      return res.json();
+  const res = await apiClient.api.documents[":id"].$get({
+    param: {
+      id: documentId,
     },
   });
+
+  if (!res.ok) notFound();
+
+  const data = await res.json();
+  await queryClient.setQueryData(documentKeys.findById(documentId), data);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

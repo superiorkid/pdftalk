@@ -39,7 +39,7 @@ const messageController = new Hono<{
         const [messages, total] = await Promise.all([
           prisma.message.findMany({
             where: { documentId },
-            orderBy: { createdAt: "asc" },
+            orderBy: { createdAt: "desc" },
             skip: (page - 1) * limit,
             take: limit,
           }),
@@ -47,19 +47,16 @@ const messageController = new Hono<{
             where: { documentId },
           }),
         ]);
-
-        const hasNextPage = page * limit < total;
-
+        const ordered = [...messages].reverse();
         return ctx.json(
           {
             success: true,
             message: "Messages retrieved successfully",
-            data: messages,
+            data: ordered,
             pagination: {
               page,
               limit,
               total,
-              hasNextPage,
             },
           },
           200,
