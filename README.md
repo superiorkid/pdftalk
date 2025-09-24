@@ -2,6 +2,21 @@
 
 Simple README for a PDF Retrieval-Augmented-Generation (RAG) web app.
 
+## Screenshots
+
+> Example UI previews of the app
+
+| Upload PDF | Chat with Document |
+|------------|--------------------|
+| ![Upload PDF](./screenshoots/upload.png) | ![Chat with PDF](./screenshoots/chat.png) |
+
+| Homepage | Auth |
+|------------|--------------------|
+| ![Homepage](./screenshoots/home.png) | ![Chat with PDF](./screenshoots/auth.png) |
+
+---
+
+
 ## Tech stack
 - **Framework:** Next.js
 - **RPC / API:** Hono / hono-rpc
