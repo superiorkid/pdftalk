@@ -1,4 +1,4 @@
-# PDF RAG Web App
+# PDFTalk
 
 Simple README for a PDF Retrieval-Augmented-Generation (RAG) web app.
 
