@@ -201,7 +201,7 @@ const documentController = new Hono<{
       await Promise.all([
         deleteFile(document.coverPath),
         deleteFile(document.filePath),
-        pineconeIndex.deleteMany({ filter: { documentId: safeDocumentId } }),
+        pineconeIndex.namespace(safeDocumentId).deleteAll(),
         prisma.document.delete({ where: { id: documentId } }),
       ]);
 
