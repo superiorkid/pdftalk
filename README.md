@@ -1,6 +1,7 @@
 # PDFTalk
 
-Simple README for a PDF Retrieval-Augmented-Generation (RAG) web app.
+PDFTalk is a modern **Retrieval-Augmented Generation (RAG)** web application that lets you **upload, search, and chat with your PDFs**.
+It combines semantic search with powerful LLMs to deliver accurate, context-aware answers directly from your documents.
 
 ## Screenshots
 
