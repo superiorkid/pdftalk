@@ -1,12 +1,10 @@
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-} from "@tanstack/react-query";
+import { randomUUID } from "node:crypto";
+import type { Message } from "@prisma/client";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { messageKeys } from "@/lib/query-keys";
 import client from "@/lib/rpc";
+import type { MessagesPage } from "@/types/message-page.type";
 
 export function useMessages(params: {
   documentId: string;
@@ -67,19 +65,87 @@ export function useSendMessage(props: {
           question,
         },
       });
+
       return res.json();
     },
-    onError: () => {
+    onMutate: async (question, context) => {
+      await context.client.cancelQueries({
+        queryKey: messageKeys.allByDocumentId(question),
+      });
+
+      const previousMessages = context.client.getQueryData(
+        messageKeys.allByDocumentId(question),
+      );
+
+      const userMessage: Message = {
+        documentId,
+        id: "temp-user",
+        sender: "USER",
+        content: question,
+        createdAt: new Date(),
+        metadata: {},
+      };
+
+      const AIPlaceholder: Message = {
+        id: "temp-ai",
+        sender: "AI",
+        content: "…",
+        createdAt: new Date(),
+        metadata: { isLoading: true },
+        documentId,
+      };
+
+      context.client.setQueryData<{
+        pages: MessagesPage[];
+        pageParams: number[];
+      }>(messageKeys.allByDocumentId(documentId), (old) => {
+        if (!old) {
+          return {
+            pages: [
+              {
+                data: [userMessage, AIPlaceholder],
+                pagination: { page: 1, limit: 10, total: 2, hasNextPage: true },
+              },
+            ],
+            pageParams: [],
+          };
+        }
+
+        return {
+          ...old,
+          pages: old.pages.map((page, index) =>
+            index === 0
+              ? {
+                  ...page,
+                  data: [...page.data, userMessage, AIPlaceholder],
+                }
+              : page,
+          ),
+        };
+      });
+
+      return {
+        previousMessages,
+      };
+    },
+    onError: (error, _variables, onMutateResult, context) => {
+      console.error(error);
       toast.error("Failed to send message", {
         description: "Failed to send message",
       });
+      if (onMutateResult?.previousMessages) {
+        context.client.setQueryData(
+          messageKeys.allByDocumentId(documentId),
+          onMutateResult.previousMessages,
+        );
+      }
     },
-    onSuccess(_data, _variables, _onMutateResult, context) {
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
       context.client.invalidateQueries({
         queryKey: messageKeys.allByDocumentId(documentId),
       });
-      toast.success("send message successfully", {
-        description: "send message successfully",
+      toast.success("Send message successfully", {
+        description: "Message sent",
       });
       onSuccess?.();
     },

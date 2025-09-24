@@ -142,7 +142,16 @@ const PromptPage = ({ documentId, limit }: PromptPageProps) => {
                     : "bg-white text-gray-900 border border-gray-200 rounded-bl-sm",
                 )}
               >
-                <MessageContent text={msg.content} isAI={msg.sender === "AI"} />
+                {(msg.metadata as { isLoading: boolean })?.isLoading ? (
+                  <span className="animate-pulse text-gray-400">
+                    AI is thinking...
+                  </span>
+                ) : (
+                  <MessageContent
+                    text={msg.content}
+                    isAI={msg.sender === "AI"}
+                  />
+                )}
                 <span
                   className={cn(
                     "absolute bottom-1 right-2 text-[10px] opacity-70",
