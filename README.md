@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PDF RAG Web App
 
-## Getting Started
+Simple README for a PDF Retrieval-Augmented-Generation (RAG) web app.
 
-First, run the development server:
+## Tech stack
+- **Framework:** Next.js
+- **RPC / API:** Hono / hono-rpc
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Data fetching:** TanStack Query
+- **Vector DB:** Pinecone
+- **LLM / embeddings:** LangChain + Gemini
+- **Auth:** Better Auth + Better Auth UI
+- **DB:** PostgreSQL + Prisma
 
+---
+
+## Features
+- Upload & index PDF documents (extract text + embeddings)
+- Search/query PDF content using vector similarity search (Pinecone)
+- RAG answers using LangChain orchestration + Gemini LLM
+- Authenticated users (Better Auth)
+- Responsive UI using Tailwind + shadcn components
+- Client caching & background queries with TanStack Query
+
+---
+
+## Quickstart
+
+### Requirements
+- Node.js (v18+)
+- PostgreSQL
+- Pinecone account and index
+- Google/Anthropic/Vertex (Gemini) API key (or any LLM provider supported by LangChain)
+
+### Install
 ```bash
-npm run dev
+# install dependencies
+bun install
 # or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env` file with the following (example):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+DATABASE_URL="postgresql://<DB_USERNAME>:<DB_PASSWORD>@<DB_HOSTNAME>:<DB_PORT>/<DB_NAME>"
 
-## Learn More
+BETTER_AUTH_SECRET=t0h3BmZShSgBTtQe2BOun8J5AtBiWtPU
+BETTER_AUTH_URL=http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+NEXT_PUBLIC_API_URL=http://localhost:3000
+GOOGLE_API_KEY=
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+PINECONE_API_KEY=
+PINECONE_ENVIRONMENT=us-east-1
+PINECONE_INDEX_NAME=
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Database
 
-## Deploy on Vercel
+```bash
+bunx prisma generate
+bunx prisma migrate dev --name init
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Local Dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run dev
+# or
+npm run dev
+```
